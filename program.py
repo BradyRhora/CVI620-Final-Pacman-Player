@@ -1,7 +1,10 @@
 import cv2 as cv
-from PIL import ImageGrab as ig
 import numpy as np
+from PIL import ImageGrab as ig
+from pynput import mouse
 
+ideal_bounds = [(670, 255), (1250, 920)]
+game_bounds = [(0, 0), (0, 0)]
 template_images = {}
 colors = {
     'pellet': (255, 255, 255),
@@ -16,10 +19,27 @@ colors = {
     'vuln_ghost': (255, 0, 255)
 }
 
+def init_game_bounds():
+    def on_click(x, y, button, pressed):
+        if pressed:
+            # mouse down
+            game_bounds[0] = (x, y)
+        else:
+            # mouse up
+            game_bounds[1] = (x, y)
+            return False
+
+    print('Please click and drag over the game bounds.')
+
+    with mouse.Listener(on_click=on_click) as listener:
+        listener.join()
+
 def get_screen():
-    screen = ig.grab(bbox=(670, 255, 1250, 920))
-    img = np.array(screen)
-    img = cv.cvtColor(img, cv.COLOR_RGB2BGR)
+    screen = ig.grab(bbox=(game_bounds[0][0], game_bounds[0][1], game_bounds[1][0], game_bounds[1][1]))
+    arr = np.array(screen)
+    img = cv.cvtColor(arr, cv.COLOR_RGB2BGR)
+    # resize to ideal bounds
+    img = cv.resize(img, (ideal_bounds[1][0] - ideal_bounds[0][0], ideal_bounds[1][1] - ideal_bounds[0][1]))
     return img
 
 def load_templates():
@@ -54,6 +74,7 @@ def detect_objects(screen):
                 cv.rectangle(screen, top_left, bottom_right, colors[template_name], 1)
 
 def main():
+    init_game_bounds()
     load_templates()
 
     while True:
