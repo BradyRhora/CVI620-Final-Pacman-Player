@@ -12,7 +12,8 @@ colors = {
     'pinky': (0, 0, 255),
     'blinky': (0, 0, 255),
     'inky': (0, 0, 255),
-    'clyde': (0, 0, 255)
+    'clyde': (0, 0, 255),
+    'vuln_ghost': (255, 0, 255)
 }
 
 def get_screen():
@@ -22,7 +23,7 @@ def get_screen():
     return img
 
 def load_templates():
-    templates = ['pacman', 'pacman-open', 'pinky', 'blinky', 'inky', 'clyde', 'power', 'cherry', 'pellet']
+    templates = ['pacman', 'pacman-open', 'pinky', 'blinky', 'inky', 'clyde', 'power', 'cherry', 'pellet', 'vuln_ghost']
     global template_images
     template_images = {}
     for template in templates:
