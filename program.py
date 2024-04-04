@@ -2,7 +2,9 @@ import cv2 as cv
 import numpy as np
 from PIL import ImageGrab as ig
 from pynput import mouse
+import pacman
 
+game = pacman.Game()
 ideal_bounds = [(670, 255), (1250, 920)]
 game_bounds = [(0, 0), (0, 0)]
 template_images = {}
@@ -53,6 +55,8 @@ def load_templates():
             exit(1)
 
 def detect_objects(screen):
+    game.reset_entities()
+
     for template_name, template_image in template_images.items():
         result = cv.matchTemplate(screen, template_image, cv.TM_SQDIFF_NORMED)
         if template_name in ['pacman', 'pacman-open', 'cherry', 'inky', 'blinky', 'pinky', 'clyde']: # single object
@@ -62,6 +66,11 @@ def detect_objects(screen):
                 h, w = template_image.shape[:2]
                 bottom_right = (top_left[0] + w, top_left[1] + h)
                 
+                if template_name in ['inky', 'blinky', 'pinky', 'clyde']:
+                    game.add_entity(pacman.Ghost(top_left, template_name))
+                elif template_name in ['pacman', 'pacman-open']:
+                    game.add_entity(pacman.Pacman(top_left))
+
                 cv.rectangle(screen, top_left, bottom_right, colors[template_name], 1)
                 cv.putText(screen, template_name, top_left, cv.FONT_HERSHEY_SIMPLEX, 0.5, colors[template_name], 1)
         else: # multiple objects
@@ -70,8 +79,30 @@ def detect_objects(screen):
                 top_left = pt
                 h, w = template_image.shape[:2]
                 bottom_right = (top_left[0] + w, top_left[1] + h)
+
+                if template_name == 'pellet':
+                    game.add_entity(pacman.Pellet(top_left))
+                elif template_name == 'power': # FIX: PowerUps being detected multiple times for some reason
+                    game.add_entity(pacman.PowerUp(top_left))
+                elif template_name == 'vuln_ghost':
+                    game.add_entity(pacman.VulnerableGhost(top_left))
                 
                 cv.rectangle(screen, top_left, bottom_right, colors[template_name], 1)
+
+def move_pacman():
+    if (game.pacman is None):
+        return
+    
+    game.pacman.move()
+
+def draw_neighbours(screen):
+    if (game.pacman is None):
+        return
+    
+    close = game.pacman.get_neighbours()
+    for (entity, dist) in close:
+        # draw on screen
+        cv.circle(screen, entity.pos, 10, (0, 255, 255), -1)
 
 def main():
     init_game_bounds()
@@ -80,8 +111,10 @@ def main():
     while True:
         screen = get_screen()
         detect_objects(screen)
+        draw_neighbours(screen)
+
         cv.imshow('screen', screen)
-        if cv.waitKey(10) & 0xFF == ord('q'):
+        if cv.waitKey(1) & 0xFF == ord('q'):
             break
         
     cv.destroyAllWindows()
