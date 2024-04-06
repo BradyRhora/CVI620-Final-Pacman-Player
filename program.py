@@ -150,7 +150,6 @@ def main():
     while True:
         screen = get_screen()
         detect_objects(screen)
-        stime = time.time()
         path = move_pacman()
 
         if path is not None:
