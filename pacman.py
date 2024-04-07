@@ -153,12 +153,6 @@ class Pacman(Entity):
     def move(self, new_pos, old_pos):
         self.old_pos = old_pos
         self.pos = new_pos
-        keys = [
-        'left',
-        'right',
-        'up',
-        'down'
-    ]
 
         neighbours = self.get_neighbours()
         neighbours.sort(key = lambda x: x[0].value, reverse = True)
@@ -189,7 +183,6 @@ class Pacman(Entity):
                 self.last_keystroke = 'down'
                 
         if not self.is_moving() or path is None:
-            # Pacman hasn't moved since the last keystroke. Try a random movement
             valid_keys = []
             if self.last_keystroke in ['left', 'right']:
                 valid_keys = ['up', 'down']
