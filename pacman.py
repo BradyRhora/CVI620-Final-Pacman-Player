@@ -1,6 +1,6 @@
 from pydirectinput import press
 import random
-# test
+
 class Game:
     def __init__(self):
         self.entities = []
@@ -160,12 +160,16 @@ class Pacman(Entity):
             next_node = path[1]
             if next_node.pos[0] < my_node.pos[0]:
                 press('left')
+                print('LEFT')
             elif next_node.pos[0] > my_node.pos[0]:
                 press('right')
+                print('RIGHT')
             elif next_node.pos[1] < my_node.pos[1]:
                 press('up')
+                print('UP')
             elif next_node.pos[1] > my_node.pos[1]:
                 press('down')
+                print('DOWN')
         
         return path
         
@@ -192,3 +196,9 @@ class VulnerableGhost(Entity):
         super().__init__(pos)
         self.type = 'vuln_ghost'
         self.value = 5
+
+class Cherry(Entity):
+    def __init__(self, pos):
+        super().__init__(pos)
+        self.type = 'cherry'
+        self.value = 4

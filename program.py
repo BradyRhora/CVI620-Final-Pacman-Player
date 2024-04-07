@@ -77,7 +77,8 @@ def detect_objects(screen, load_board = False):
         'pellet': pacman.Pellet,
         'power': pacman.PowerUp,
         'vuln_ghost': pacman.VulnerableGhost,
-        'vuln_ghost_2': pacman.VulnerableGhost
+        'vuln_ghost_2': pacman.VulnerableGhost,
+        'cherry': pacman.Cherry
     }
 
     for template_name, template_image in template_images.items():
