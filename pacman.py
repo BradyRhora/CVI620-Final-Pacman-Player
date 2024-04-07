@@ -7,6 +7,7 @@ class Game:
         self.entities = []
         self.board = []
         self.pacman = None
+        self.pac_goal = None
         self.bounds = None
 
     def reset_entities(self):
@@ -170,14 +171,16 @@ class Pacman(Entity):
     def move(self, new_pos, old_pos):
         self.old_pos = old_pos
         self.pos = new_pos
-
-        neighbours = self.get_neighbours()
-        neighbours.sort(key = lambda x: x[0].value, reverse = True)
-        if len(neighbours) == 0:
-            return None
-
+        
         my_node = self.game.get_closest_node(self.pos)
-        path = self.game.plot_path(self, neighbours[0][0])
+        if self.game.pac_goal is None or my_node == self.game.pac_goal:
+            neighbours = self.get_neighbours()
+            neighbours.sort(key = lambda x: x[0].value, reverse = True)
+            if len(neighbours) == 0:
+                return None
+            self.game.pac_goal = neighbours[0][0]
+
+        path = self.game.plot_path(self, self.game.pac_goal)
         if path is not None:
             if len(path) == 1:
                 return None
