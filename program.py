@@ -128,11 +128,13 @@ def detect_objects(screen, load_board = False):
                                     node.neighbour_L = node2
                                 else:
                                     node.neighbour_R = node2
-def move_pacman():
+def move_pacman(screen):
     if (game.pacman is None):
         return
-    
-    return game.pacman.move()
+    new_pos = get_new_position(get_screen(), game.pacman.template)
+    if new_pos is None:
+        new_pos = game.pacman.pos
+    return game.pacman.move(new_pos, game.pacman.pos)
 
 def draw_neighbours(screen):
     if (game.pacman is None):
@@ -142,6 +144,19 @@ def draw_neighbours(screen):
     for (entity, dist) in close:
         # draw on screen
         cv.circle(screen, entity.pos, 10, (0, 255, 255), -1)
+        
+def get_new_position(screen, template):
+    result = cv.matchTemplate(screen, game.pacman.template, cv.TM_SQDIFF_NORMED)
+    h, w = template.shape[:2]
+    if result.min() < 0.3:
+                _, _, min_loc, _ = cv.minMaxLoc(result)
+                top_left = min_loc
+                bottom_right = (top_left[0] + w, top_left[1] + h)
+                center = (top_left[0] + w // 2, top_left[1] + h // 2)
+                
+                cv.rectangle(screen, top_left, bottom_right, (255, 0, 0), 2)
+    
+                return center
 
 def main():
     init_game_bounds()
@@ -151,7 +166,8 @@ def main():
     while True:
         screen = get_screen()
         detect_objects(screen)
-        path = move_pacman()
+
+        path = move_pacman(screen)
 
         if path is not None:
             for i in range(len(path) - 1):

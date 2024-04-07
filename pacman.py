@@ -1,5 +1,6 @@
 from pydirectinput import press
 import random
+import cv2 as cv
 
 class Game:
     def __init__(self):
@@ -28,7 +29,7 @@ class Game:
     
     def get_node(self, pos):
         for node in self.board:
-            if abs(node.pos[0] - pos[0]) < 10 and abs(node.pos[1] - pos[1]) < 10:
+            if abs(node.pos[0] - pos[0]) < 20 and abs(node.pos[1] - pos[1]) < 20:
                 return node
         return None
     
@@ -145,8 +146,20 @@ class Pacman(Entity):
     def __init__(self, pos):
         super().__init__(pos)
         self.type = 'pacman'
+        self.template = cv.imread('templates/pacman.png')
+        self.old_pos = (0, 0)
+        self.last_keystroke = None
 
-    def move(self):
+    def move(self, new_pos, old_pos):
+        self.old_pos = old_pos
+        self.pos = new_pos
+        keys = [
+        'left',
+        'right',
+        'up',
+        'down'
+    ]
+
         neighbours = self.get_neighbours()
         neighbours.sort(key = lambda x: x[0].value, reverse = True)
         if len(neighbours) == 0:
@@ -160,20 +173,44 @@ class Pacman(Entity):
             next_node = path[1]
             if next_node.pos[0] < my_node.pos[0]:
                 press('left')
-                print('LEFT')
+                # print('LEFT')
+                self.last_keystroke = 'left'
             elif next_node.pos[0] > my_node.pos[0]:
                 press('right')
-                print('RIGHT')
+                # print('RIGHT')
+                self.last_keystroke = 'right'
             elif next_node.pos[1] < my_node.pos[1]:
                 press('up')
-                print('UP')
+                # print('UP')
+                self.last_keystroke = 'up'
             elif next_node.pos[1] > my_node.pos[1]:
                 press('down')
-                print('DOWN')
-        
+                # print('DOWN')
+                self.last_keystroke = 'down'
+                
+        if not self.is_moving() or path is None:
+            # Pacman hasn't moved since the last keystroke. Try a random movement
+            valid_keys = []
+            if self.last_keystroke in ['left', 'right']:
+                valid_keys = ['up', 'down']
+            elif self.last_keystroke in ['up', 'down']:
+                valid_keys = ['left', 'right']
+            
+            if valid_keys:
+                random_key = random.choice(valid_keys)
+                press(random_key)
+                # print("Pressing {} to attempt to reposition.".format(random_key))
+                self.current_keystroke = random_key
+
+
         return path
         
-
+    def is_moving(self):
+        if self.pos != self.old_pos:
+            return True
+        else:
+            return False
+        
 class Pellet(Entity):
     def __init__(self, pos):
         super().__init__(pos)
