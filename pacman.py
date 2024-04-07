@@ -59,6 +59,10 @@ class Game:
         start.h = start.distance(end)
         start.f = start.h
         bad_nodes = [self.get_closest_node(entity.pos) for entity in self.entities_last if entity.type == 'ghost']
+        temp = []
+        for bad_node in bad_nodes:
+            temp.extend(bad_node.get_bad_node_neighbours(2))
+        bad_nodes.extend(temp)
 
         while len(open_list) > 0:
             current = open_list[0]
@@ -116,6 +120,19 @@ class Entity:
                 break
         return neighbours
     
+    # for getting the nearby nodes of ghosts to avoid those nodes as well
+    def get_bad_node_neighbours(self, depth=2):
+        bad_nodes = []
+        for _ in range(depth):
+            for neighbor in self.get_neighbours():
+                if neighbor not in bad_nodes:
+                    bad_nodes.append(neighbor)
+            for neighbor in bad_nodes[:]:
+                for n in neighbor.get_neighbours():
+                    if n not in bad_nodes:
+                        bad_nodes.append(n)
+        return bad_nodes
+
 
 class Map_Node(Entity):
     def __init__(self, pos):
