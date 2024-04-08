@@ -94,7 +94,7 @@ def detect_objects(screen, load_board = False):
 
     for template_name, template_image in template_images.items():
         def match_template(template_name, template_image):
-            #t_start = time.time()
+            t_start = time.time()
             result = cv.matchTemplate(screen, template_image, cv.TM_SQDIFF_NORMED)
             h, w = template_image.shape[:2]
 
@@ -123,7 +123,7 @@ def detect_objects(screen, load_board = False):
 
                     if debug_mode:
                         cv.rectangle(screen, top_left, bottom_right, colors[template_name], 2)
-            #t_end = time.time()
+            t_end = time.time()
             #print(f'{template_name} took {t_end - t_start} seconds')
         thread = threading.Thread(target=match_template, args=(template_name, template_image))
         threads.append(thread)

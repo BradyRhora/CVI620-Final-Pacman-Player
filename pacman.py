@@ -1,6 +1,7 @@
 from pydirectinput import press
 import random
 import cv2 as cv
+import time
 
 class Game:
     def __init__(self):
@@ -169,6 +170,7 @@ class Pacman(Entity):
         self.last_keystroke = None
 
     def move(self, new_pos, old_pos):
+        time_s = time.time()
         self.old_pos = old_pos
         self.pos = new_pos
         
@@ -179,6 +181,10 @@ class Pacman(Entity):
             if len(neighbours) == 0:
                 return None
             self.game.pac_goal = neighbours[0][0]
+
+        time_e = time.time()
+        print('move #1 ', time_e - time_s)
+        time_s = time.time()
 
         path = self.game.plot_path(self, self.game.pac_goal)
         if path is not None:
@@ -201,7 +207,14 @@ class Pacman(Entity):
                 press('down')
                 # print('DOWN')
                 self.last_keystroke = 'down'
-                
+        
+        time_e = time.time()
+        print('move #2 ', time_e - time_s)
+        return path
+    
+        # IDK why but this section causes the program to completely freeze up
+        time_s = time.time()
+
         if not self.is_moving() or path is None:
             valid_keys = []
             if self.last_keystroke in ['left', 'right']:
@@ -215,7 +228,8 @@ class Pacman(Entity):
                 # print("Pressing {} to attempt to reposition.".format(random_key))
                 self.current_keystroke = random_key
 
-
+        time_e = time.time()
+        print('move #3 ', time_e - time_s)
         return path
         
     def is_moving(self):
